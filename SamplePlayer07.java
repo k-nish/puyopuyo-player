@@ -32,11 +32,9 @@ for(int i = 0; i < PuyoDirection.values().length; i++){
  * @author tori
  */
 public class SamplePlayer07 extends AbstractSamplePlayer {
-
-
 	@Override
 	public Action doMyTurn() {
-
+		
 		//現在のフィールドの状況
 		Field field = getMyBoard().getField();
 		//今降ってきているぷよ
@@ -52,7 +50,6 @@ public class SamplePlayer07 extends AbstractSamplePlayer {
 				if(field.isEnable(dir, i)){
 					//現在のぷよを回転させる
 					puyo.setDirection(dir);
-
 					//もし現在のpuyoをi列目に落としたら，その後のフィールドの状態がnextFieldになる
 					Field nextField = field.getNextField(puyo, i);
 					if(nextField != null){
@@ -88,16 +85,14 @@ public class SamplePlayer07 extends AbstractSamplePlayer {
 		//field.getTop(columnNum)で，ぷよが存在する場所を返すので，
 		//それより1大きい数のぷよがその列には存在する
 		//ぷよが一つもない列は-1が返ってくることに注意．
-
 		for(int i = 0; i < field.getWidth(); i++){
 			num+=field.getTop(i)+1;
 		}
-
 		return num;
 	}
 
 	/**
-	 * 特に配置する場所がなかった場合の基本行動
+	 * 特に配置する場所がなかった場合の基本行動(一番ぷよが少ないところに入れる)
 	 * @return
 	 */
 	Action getDefaultAction(){
@@ -109,10 +104,7 @@ public class SamplePlayer07 extends AbstractSamplePlayer {
 				minColumn = i;
 			}
 		}
-
 		Action action = new Action(PuyoDirection.DOWN, minColumn);
-
-
 		return action;
 	}
 
@@ -120,7 +112,6 @@ public class SamplePlayer07 extends AbstractSamplePlayer {
 
 	public static void main(String args[]) {
 		AbstractPlayer player1 = new SamplePlayer07();
-
 		PuyoPuyo puyopuyo = new PuyoPuyo(player1);
 		puyopuyo.puyoPuyo();
 	}
