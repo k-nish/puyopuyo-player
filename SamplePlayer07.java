@@ -1,7 +1,4 @@
 package player;
-
-
-
 import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.AbstractPlayer;
 import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.Action;
 import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.Board;
