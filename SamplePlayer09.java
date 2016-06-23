@@ -4,7 +4,7 @@ package player;
 
 import sp.AbstractSamplePlayer;
 
-import sp.ConnectionCounter;
+//import sp.ConnectionCounter;
 import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.AbstractPlayer;
 import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.Action;
 import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.Board;
