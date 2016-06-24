@@ -56,7 +56,7 @@ public class Practice1 extends AbstractSamplePlayer {
 		//降ってくるおじゃまぷよの数
 		int ojamanum = getMyBoard().getTotalNumberOfOjama();
 		//おじゃまぷよのリスト
-		List<Integer> ojamalist = getMyBoard().getNumbersOfOjamaList();
+		//List<Integer> ojamalist = getMyBoard().getNumbersOfOjamaList();
 		//もっとも高い高さ
 		int maxi = 0;
 		int maxhigh = field.getTop(maxi);
@@ -67,13 +67,15 @@ public class Practice1 extends AbstractSamplePlayer {
 			}
 		}
 		//ぷよの数が半分以下なら3つつながりを作るように積む
-		if (puyonum <= 30 && ojamanum == 0 && maxhigh <= 10){
-			action = getThreeAction();
-			System.out.println("Get Three Action!");
+		if (ojamanum == 0 && maxhigh <= 10){
+			// action = getThreeAction();
+			// System.out.println("Get Three Action!");
+			action = getNeighbourAction();
+			System.out.println("get neighbor action!");
 			//ぷよの数が半分より多ければ2手先まで読んで最小となるように積む
-		} else if (puyonum > 30 && puyonum < 45 && ojamanum == 0 && maxhigh <= 10){
-			action = niteyomiAction();
-			System.out.println("niteyomiAction!");
+		//} else if (puyonum > 30 && puyonum < 45 && ojamanum == 0 && maxhigh <= 10){
+			//action = niteyomiAction();
+			//System.out.println("niteyomiAction!");
 		} else if (puyonum > 45 || ojamanum > 0 || maxhigh > 10) {
 			action = DeleteAction1();
 			System.out.println("Delete Action1!");
@@ -94,11 +96,8 @@ public class Practice1 extends AbstractSamplePlayer {
 		return action;
 	}
 
-	/**
-	 * 指定したフィールドのぷよ数を返す
-	 * @param field
-	 * @return
-	 */
+
+	//指定したフィールドのぷよ数を返す
 	int getPuyoNum(Field field){
 		int num = 0;
 		//ここでぷよの数を数える．
@@ -129,8 +128,214 @@ public class Practice1 extends AbstractSamplePlayer {
 		}
 		return num;
 	}
-	
-	
+
+	//actionを引数にして次のターンで消すぷよの数を返す
+	int deletePuyoNum(Action action){
+		//現在のboardを取得
+		Board board = getGameInfo().getBoard(getMyPlayerInfo());
+		//現在のfieldを取得
+		Field field = board.getField();
+		//現在のfieldのぷよの総数を取得
+		int puyonum = getPuyoNum(field);
+		//現在落ちてきているぷよを取得
+		Puyo puyo = getMyBoard().getCurrentPuyo();
+		//次のactionでぷよを置くcolumn
+		int column = action.getColmNumber();
+		//次のactionでぷよを置くdirection
+		PuyoDirection dir = action.getDirection();
+		//ここでactionがisEnableかどうかを判定するべきだけどなくても動くから省略
+		//ぷよの方向をset
+		puyo.setDirection(dir);
+		//nextFieldを取得
+		Field nextField = field.getNextField(puyo,column);
+		//nextFieldのぷよの総数を取得
+		int nextpuyonum = getPuyoNum(nextField);
+		//次のactionで消えるぷよの数を計算し、返す
+		int deletepuyonum = nextpuyonum - puyonum;
+
+		return deletepuyonum;
+	}
+
+	//ぷよを最大限消すaction
+	Action maxBomb(){
+		//現在のboardを取得
+		Board board = getGameInfo().getBoard(getMyPlayerInfo());
+		//現在のfieldを取得
+		Field field = board.getField();
+		//現在落ちてきているpuyo
+		Puyo puyo = getMyBoard().getCurrentPuyo();
+		//現在の自分のfieldのぷよ数を取得
+		int puyoNum = getPuyoNum(field);
+		//actionの初期値をnull
+		Action action = null;
+		// ぷよを置くcolumnとdir(初期値をdown)を設定
+		int column = 0;
+		PuyoDirection direction = PuyoDirection.DOWN;
+		//nextFieldのぷよ最小値を設定
+		int minpuyonum = puyoNum;
+		for (int i = 0; i < field.getWidth(); i++ ) {
+			for(PuyoDirection dir:PuyoDirection.values()){
+				//nextFieldを取得
+				Field nextField = field.getNextField(puyo, i);
+				//nextFieldのぷよの総数を取得
+				int nextpuyonum = getPuyoNum(nextField);
+				if(!field.isEnable(dir,i) && nextpuyonum > puyoNum){
+					continue;
+				}
+				if (nextpuyonum < minpuyonum) {
+					column = i;
+					direction = dir;
+					minpuyonum = nextpuyonum;
+				}
+
+			}
+		}
+		//actionを設定
+		action = new Action(direction, column);
+		//actionを返す
+		return action;
+	}
+
+	//降ってくるぷよが同色でただ3個ずつ繋げられるところに置きたい。ぷよを消去させてしまうところには置かない。
+	Action getNeighbourAction(){
+		//actionの初期値はnull
+		Action action = null;
+		//現在のboardを取得
+		Board board = getGameInfo().getBoard(getMyPlayerInfo());
+		//現在のfieldを取得
+		Field field = board.getField();
+		//現在の自分のfieldのぷよ数を取得
+		int puyoNum = getPuyoNum(field);
+		//現在落ちてきているぷよを取得
+		Puyo puyo = getMyBoard().getCurrentPuyo();
+		// 次に降ってくるぷよを取得
+		Puyo nextpuyo = getMyBoard().getNextPuyo();
+		for(int i = 0; i < field.getWidth(); i++){
+			for(PuyoDirection dir:PuyoDirection.values()){
+				//nextFieldを取得
+				Field nextField = field.getNextField(puyo, i);
+				//nextFieldのぷよの総数を取得
+				int nextpuyonum = getPuyoNum(nextField);
+				if(!field.isEnable(dir,i) && nextpuyonum > puyoNum){
+					continue;
+				}
+				//落ちてくるぷよをfirstPuyoとsecondPuyoと名付ける
+				//PuyoType firstPuyo = puyo.getPuyoType(PuyoNumber.FIRST);
+				//PuyoType secondPuyo = puyo.getPuyoType(PuyoNumber.SECOND);
+				//firstPuyoとsecondPuyoの周りの同色ぷよの数をそれぞれfirstNeighbor,secondNeighborとする
+				int firstNeighbor = 0;
+				int secondNeighbor = 0;
+				//最初のぷよの周りに存在する同色ぷよ数を数える
+				if(dir == PuyoDirection.DOWN){
+					//二番目のぷよが下(正しくは上)にある場合は，nextFieldのtopの1つ下がy座標
+					int y = field.getTop(i)+2;
+					firstNeighbor = getSameTypeNum(nextField, i, y);
+				}
+				else{
+					//二番目のぷよが下にある場合以外は，nextFieldのtopがy座標
+					int y = field.getTop(i)+1;
+					firstNeighbor = getSameTypeNum(nextField, i, y);
+				}
+
+				//二番目のぷよの周りに存在する同色ぷよを数える
+				if(dir == PuyoDirection.DOWN){
+					//二番目のぷよが下にある場合
+					int y = field.getTop(i)+1;
+					secondNeighbor = getSameTypeNum(nextField, i, y);
+				}
+				else if(dir == PuyoDirection.UP){
+					//二番目のぷよが上にある場合
+					int y = field.getTop(i)+2;
+					secondNeighbor = getSameTypeNum(nextField, i, y);
+				}
+				else if(dir == PuyoDirection.RIGHT){
+					//二番目のぷよが右にある場合
+					int x = i + 1;
+					int y = nextField.getTop(x);
+					secondNeighbor = getSameTypeNum(nextField, x, y);
+				}
+				else if(dir == PuyoDirection.LEFT){
+					//二番目のぷよが左にある場合
+					int x = i - 1;
+					int y = nextField.getTop(x);
+					secondNeighbor = getSameTypeNum(nextField, x, y);
+				}
+				// firstNeighborとsecondNeighborが両方3になるならそこに置く
+				if (firstNeighbor == 2 && secondNeighbor == 2) {
+					action = new Action(dir, i);
+				}
+				else if (firstNeighbor == 2 || secondNeighbor == 2) {
+					action = new Action(dir, i);
+				}
+				else if (firstNeighbor == 1 || secondNeighbor == 1) {
+					//next2fieldで3連鎖が作れる場所を探索する
+					for(int j = 0; j < field.getWidth(); j++){
+						for(PuyoDirection dir2:PuyoDirection.values()){
+							//next2Fieldを取得
+							Field next2Field = nextField.getNextField(puyo, i);
+							//next2Fieldのぷよの総数を取得
+							int next2puyonum = getPuyoNum(next2Field);
+							if(!nextField.isEnable(dir2,j) && next2puyonum > nextpuyonum){
+								continue;
+							}
+							//次に落ちてくるぷよをfirstPuyoとsecondPuyoと名付ける
+							PuyoType firstnextPuyo = nextpuyo.getPuyoType(PuyoNumber.FIRST);
+							PuyoType secondnextPuyo = nextpuyo.getPuyoType(PuyoNumber.SECOND);
+							//firstPuyoとsecondPuyoの周りの同色ぷよの数をそれぞれfirstNeighbor,secondNeighborとする
+							int firstNextNeighbor = 0;
+							int secondNextNeighbor = 0;
+							//最初のぷよの周りに存在する同色ぷよ数を数える
+							if(dir2 == PuyoDirection.DOWN){
+							//二番目のぷよが下(正しくは上)にある場合は，nextFieldのtopの1つ下がy座標
+								int y = nextField.getTop(j)+2;
+								firstNextNeighbor = getSameTypeNum(next2Field, j, y);
+							}
+							else{
+							//二番目のぷよが下にある場合以外は，nextFieldのtopがy座標
+								int y = nextField.getTop(j)+1;
+								firstNextNeighbor = getSameTypeNum(next2Field, j, y);
+							}
+
+							//二番目のぷよの周りに存在する同色ぷよを数える
+							if(dir2 == PuyoDirection.DOWN){
+								//二番目のぷよが下にある場合
+								int y = nextField.getTop(j)+1;
+								secondNextNeighbor = getSameTypeNum(next2Field, j, y);
+							}
+							else if(dir2 == PuyoDirection.UP){
+								//二番目のぷよが上にある場合
+								int y = nextField.getTop(j)+2;
+								secondNextNeighbor = getSameTypeNum(nextField, j, y);
+							}
+							else if(dir2 == PuyoDirection.RIGHT){
+								//二番目のぷよが右にある場合
+								int x = j + 1;
+								int y = next2Field.getTop(x);
+								secondNextNeighbor = getSameTypeNum(next2Field, x, y);
+							}
+							else if(dir2 == PuyoDirection.LEFT){
+								//二番目のぷよが左にある場合
+								int x = j - 1;
+								int y = next2Field.getTop(x);
+								secondNextNeighbor = getSameTypeNum(next2Field, x, y);
+							}
+							if (firstNextNeighbor == 2 && secondNextNeighbor == 2) {
+								action = new Action(dir, i);
+							}
+							else if (firstNextNeighbor == 2 || secondNextNeighbor == 2) {
+								action = new Action(dir, i);
+							}
+						}
+					}
+				}
+			}
+		}
+		return action;
+	}
+
+
+
+
 	//ただ3個つながるように配置する
 	Action getThreeAction(){
 		Board board = getGameInfo().getBoard(getMyPlayerInfo());
@@ -155,7 +360,7 @@ public class Practice1 extends AbstractSamplePlayer {
 					int nextFieldNum = getPuyoNum(nextField);
 					if(nextField != null){
 						int nextNum = getSameTypeNum(nextField, i, field.getTop(i)+1);
-						if (nextNum == 3 && nextFieldNum > puyoNum){
+						if (nextNum == 2 && nextFieldNum > puyoNum){
 							action = new Action(dir,i);
 						}
 					}
