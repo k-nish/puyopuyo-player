@@ -14,6 +14,7 @@ import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.Puyo.PuyoNumber;
 import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.PuyoPuyo;
 import jp.ac.nagoya_u.is.ss.kishii.usui.system.storage.PuyoType;
 import sp.AbstractSamplePlayer;
+import sp.ConnectionCounter;
 
 
 /*
@@ -67,7 +68,7 @@ public class Practice1 extends AbstractSamplePlayer {
 			}
 		}
 		//ぷよの数が半分以下なら3つつながりを作るように積む
-		if (ojamanum == 0 && maxhigh <= 10){
+		if (puyonum < 45 && ojamanum == 0 && maxhigh <= 10){
 			// action = getThreeAction();
 			// System.out.println("Get Three Action!");
 			action = getNeighbourAction();
@@ -135,6 +136,8 @@ public class Practice1 extends AbstractSamplePlayer {
 		Board board = getGameInfo().getBoard(getMyPlayerInfo());
 		//現在のfieldを取得
 		Field field = board.getField();
+		
+		ConnectionCounter cnt = new ConnectionCounter(field);
 		//現在のfieldのぷよの総数を取得
 		int puyonum = getPuyoNum(field);
 		//現在落ちてきているぷよを取得
@@ -157,7 +160,7 @@ public class Practice1 extends AbstractSamplePlayer {
 	}
 
 	//ぷよを最大限消すaction
-	Action maxBomb(){
+	Action Bombone(){
 		//現在のboardを取得
 		Board board = getGameInfo().getBoard(getMyPlayerInfo());
 		//現在のfieldを取得
@@ -196,6 +199,11 @@ public class Practice1 extends AbstractSamplePlayer {
 		return action;
 	}
 
+	// 2手先まで読んで消すぷよが最大になる数を数える
+	//Action Bombtwo(){
+
+	//}
+
 	//降ってくるぷよが同色でただ3個ずつ繋げられるところに置きたい。ぷよを消去させてしまうところには置かない。
 	Action getNeighbourAction(){
 		//actionの初期値はnull
@@ -204,6 +212,8 @@ public class Practice1 extends AbstractSamplePlayer {
 		Board board = getGameInfo().getBoard(getMyPlayerInfo());
 		//現在のfieldを取得
 		Field field = board.getField();
+		//ぷよの周りの同色のぷよの数
+		//ConnectionCounter cnt = new ConnectionCounter(field);
 		//現在の自分のfieldのぷよ数を取得
 		int puyoNum = getPuyoNum(field);
 		//現在落ちてきているぷよを取得
@@ -219,10 +229,7 @@ public class Practice1 extends AbstractSamplePlayer {
 				if(!field.isEnable(dir,i) && nextpuyonum > puyoNum){
 					continue;
 				}
-				//落ちてくるぷよをfirstPuyoとsecondPuyoと名付ける
-				//PuyoType firstPuyo = puyo.getPuyoType(PuyoNumber.FIRST);
-				//PuyoType secondPuyo = puyo.getPuyoType(PuyoNumber.SECOND);
-				//firstPuyoとsecondPuyoの周りの同色ぷよの数をそれぞれfirstNeighbor,secondNeighborとする
+				//落ちてくるぷよ1つ目、2つ目の周りの同色ぷよの数をそれぞれfirstNeighbor,secondNeighborとする
 				int firstNeighbor = 0;
 				int secondNeighbor = 0;
 				//最初のぷよの周りに存在する同色ぷよ数を数える
@@ -272,16 +279,13 @@ public class Practice1 extends AbstractSamplePlayer {
 					for(int j = 0; j < field.getWidth(); j++){
 						for(PuyoDirection dir2:PuyoDirection.values()){
 							//next2Fieldを取得
-							Field next2Field = nextField.getNextField(puyo, i);
+							Field next2Field = nextField.getNextField(nextpuyo, j);
 							//next2Fieldのぷよの総数を取得
 							int next2puyonum = getPuyoNum(next2Field);
 							if(!nextField.isEnable(dir2,j) && next2puyonum > nextpuyonum){
 								continue;
 							}
-							//次に落ちてくるぷよをfirstPuyoとsecondPuyoと名付ける
-							PuyoType firstnextPuyo = nextpuyo.getPuyoType(PuyoNumber.FIRST);
-							PuyoType secondnextPuyo = nextpuyo.getPuyoType(PuyoNumber.SECOND);
-							//firstPuyoとsecondPuyoの周りの同色ぷよの数をそれぞれfirstNeighbor,secondNeighborとする
+							//落ちてくるぷよの1つ目と2つ目のぷよの周りの同色ぷよの数をそれぞれfirstNeighbor,secondNeighborとする
 							int firstNextNeighbor = 0;
 							int secondNextNeighbor = 0;
 							//最初のぷよの周りに存在する同色ぷよ数を数える
@@ -325,6 +329,9 @@ public class Practice1 extends AbstractSamplePlayer {
 							else if (firstNextNeighbor == 2 || secondNextNeighbor == 2) {
 								action = new Action(dir, i);
 							}
+							else if (firstNextNeighbor == 1 || secondNextNeighbor == 2) {
+								action = new Action(dir, i);
+							}
 						}
 					}
 				}
@@ -332,8 +339,6 @@ public class Practice1 extends AbstractSamplePlayer {
 		}
 		return action;
 	}
-
-
 
 
 	//ただ3個つながるように配置する
@@ -370,7 +375,7 @@ public class Practice1 extends AbstractSamplePlayer {
 		return action;
 	}
 
-	//2連鎖以上の爆発
+	//ぷよの数が減らせるならそこに打つaction
 	Action DeleteAction1(){
 		Board board = getGameInfo().getBoard(getMyPlayerInfo());
 		Field field = board.getField();
