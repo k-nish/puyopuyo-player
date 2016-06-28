@@ -56,8 +56,6 @@ public class Practice1 extends AbstractSamplePlayer {
 		int puyonum = getPuyoNum(field);
 		//降ってくるおじゃまぷよの数
 		int ojamanum = getMyBoard().getTotalNumberOfOjama();
-		//おじゃまぷよのリスト
-		//List<Integer> ojamalist = getMyBoard().getNumbersOfOjamaList();
 		//もっとも高い高さ
 		int maxi = 0;
 		int maxhigh = field.getTop(maxi);
@@ -67,16 +65,18 @@ public class Practice1 extends AbstractSamplePlayer {
 				maxhigh = field.getTop(i);
 			}
 		}
-		//ぷよの数が半分以下なら3つつながりを作るように積む
+
+		//おじゃまぷよがいない、かつ4連鎖以上の連鎖ができない→getNeighbourAction
+		//getNeighbourAction:3個のつながりを作るように積む
 		if (puyonum < 45 && ojamanum == 0 && maxhigh <= 10){
-			// action = getThreeAction();
-			// System.out.println("Get Three Action!");
-			action = getNeighbourAction();
-			System.out.println("get neighbor action!");
+			//action = getNeighbourAction();
+			//System.out.println("get neighbor action!");
+			action = niteyomiAction();
+			System.out.println("似て読み");
 			//ぷよの数が半分より多ければ2手先まで読んで最小となるように積む
-		//} else if (puyonum > 30 && puyonum < 45 && ojamanum == 0 && maxhigh <= 10){
-			//action = niteyomiAction();
-			//System.out.println("niteyomiAction!");
+		} else if (puyonum > 30 && puyonum < 45 && ojamanum == 0 && maxhigh <= 10){
+			action = niteyomiAction();
+			System.out.println("niteyomiAction!");
 		} else if (puyonum > 45 || ojamanum > 0 || maxhigh > 10) {
 			action = DeleteAction1();
 			System.out.println("Delete Action1!");
@@ -86,7 +86,7 @@ public class Practice1 extends AbstractSamplePlayer {
 		//もし上の2つのactionができなければ2連鎖以上するようにならべる
 		if (action == null) {
 			action = DeleteAction1();
-			System.out.println("delete action1s");
+			System.out.println("delete action1");
 		}
 		//これまでのactionが実行できなければDefaultActionを実行する
 		if (action == null) {
@@ -136,8 +136,6 @@ public class Practice1 extends AbstractSamplePlayer {
 		Board board = getGameInfo().getBoard(getMyPlayerInfo());
 		//現在のfieldを取得
 		Field field = board.getField();
-		
-		ConnectionCounter cnt = new ConnectionCounter(field);
 		//現在のfieldのぷよの総数を取得
 		int puyonum = getPuyoNum(field);
 		//現在落ちてきているぷよを取得
@@ -199,11 +197,6 @@ public class Practice1 extends AbstractSamplePlayer {
 		return action;
 	}
 
-	// 2手先まで読んで消すぷよが最大になる数を数える
-	//Action Bombtwo(){
-
-	//}
-
 	//降ってくるぷよが同色でただ3個ずつ繋げられるところに置きたい。ぷよを消去させてしまうところには置かない。
 	Action getNeighbourAction(){
 		//actionの初期値はnull
@@ -212,8 +205,6 @@ public class Practice1 extends AbstractSamplePlayer {
 		Board board = getGameInfo().getBoard(getMyPlayerInfo());
 		//現在のfieldを取得
 		Field field = board.getField();
-		//ぷよの周りの同色のぷよの数
-		//ConnectionCounter cnt = new ConnectionCounter(field);
 		//現在の自分のfieldのぷよ数を取得
 		int puyoNum = getPuyoNum(field);
 		//現在落ちてきているぷよを取得
@@ -407,9 +398,11 @@ public class Practice1 extends AbstractSamplePlayer {
 		return action;
 	}
 
-	//2手先まで読んでpuyoの総数が最小となるように並べる
+	//3手先まで読んでpuyoの総数が最小となるように並べる
 	Action niteyomiAction(){
+		//boardの取得
 		Board board = getGameInfo().getBoard(getMyPlayerInfo());
+		//fieldの取得
 		Field field = board.getField();
 		//今降ってきているぷよ
 		Puyo puyo = getMyBoard().getCurrentPuyo();
@@ -435,6 +428,8 @@ public class Practice1 extends AbstractSamplePlayer {
 					puyo.setDirection(dir);
 					//もし現在のpuyoをi列目に落としたら，その後のフィールドの状態がnextFieldになる
 					Field nextField = field.getNextField(puyo, i);
+					// nextfieldのぷよの総数を取得
+					int nextpuyonum = getPuyoNum(nextField);
 					for (int j=0; j<field.getWidth(); j++){
 						for(PuyoDirection dir2:PuyoDirection.values()){
 							if(field.isEnable(dir2, j)){
@@ -442,6 +437,8 @@ public class Practice1 extends AbstractSamplePlayer {
 								nextpuyo.setDirection(dir2);
 								//nextpuyoのパラメータをj,dir2にしたときのfieldをnext2Fieldとする
 								Field next2Field = nextField.getNextField(nextpuyo, j);
+								// next2Fieldのぷよの総数を取得
+								int next2puyonum = getPuyoNum(next2Field);
 								for (int k=0; k<field.getWidth(); k++){
 									for(PuyoDirection dir3:PuyoDirection.values()){
 										if(field.isEnable(dir3, k)){
@@ -451,7 +448,7 @@ public class Practice1 extends AbstractSamplePlayer {
 											Field next3Field = next2Field.getNextField(next2puyo, k);
 											//next3Fieldのpuyoの総数を数える
 											int next3num = getPuyoNum(next3Field);
-											if (next3num < min3num){
+											if (nextpuyonum > puyoNum && next2puyonum > nextpuyonum && next3num < min3num){
 												mincolumn = i;
 												mindir = dir;
 												action = new Action(mindir, mincolumn);
