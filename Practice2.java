@@ -19,30 +19,25 @@ import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.PuyoPuyo;
  * ぷよを設置したときの盤面のスコアが最大になる配置を選択するプレイヤー
  * @author tori
  */
+//次の盤面のスコアを最大になる配置を選択するプレイヤー
 public class Practice2 extends AbstractSamplePlayer {
 
 
 	@Override
 	public Action doMyTurn() {
-
-		/**
-		 * 現在のフィールドの状況
-		 */
+		// 現在のフィールド状況の取得
 		Field field = getMyBoard().getField();
-
-
+		// actionの初期値をnull
 		Action action = null;
+		// scoreの最大値をmaxScoreにする
 		int maxScore = 0;
 		for(int i = 0; i < field.getWidth(); i++){
 			for(PuyoDirection dir:PuyoDirection.values()){
-
-				/**
-				 * 配置不可能，または負けてしまうような配置は最初から考慮しない
-				 */
-				if(!isEnable(dir, i)){
+				// 配置不能、もしくは負けてしまうところには置かない
+				if(!field.isEnable(dir, i)){
 					continue;
 				}
-
+				// 盤面のスコアをscoreに代入
 				int score = getScore(i, dir);
 				if(score > maxScore){
 					action = new Action(dir, i);
@@ -50,7 +45,6 @@ public class Practice2 extends AbstractSamplePlayer {
 				}
 			}
 		}
-
 		if(action == null){
 			System.out.println("Default");
 			action = getDefaultAction();
@@ -59,6 +53,14 @@ public class Practice2 extends AbstractSamplePlayer {
 		printField(field);
 		System.out.printf("%d-%s(%d)\n", action.getColmNumber(), action.getDirection(), maxScore);
 		System.out.println("----------------------");
+		//System.out.println("countField");
+		//ConnectionCounter cnt = new ConnectionCounter(field);
+		//int[][] countField = cnt.getConnectedPuyoNum();
+		//for(int i = 0; i < countField.length; i++){
+		//	for(int j = 0; j < countField[i].length; j++){
+		//		System.out.println(countField[i][j]);
+		//	}
+		//}
 
 		return action;
 	}
@@ -70,16 +72,18 @@ public class Practice2 extends AbstractSamplePlayer {
 	 * @return
 	 */
 	private int getScore(int x, PuyoDirection dir) {
-//		System.out.printf("%d,%s\n", x, dir);
+		// 現在のフィールドを取得
 		Field field = getMyBoard().getField();
+		// 現在落ちてきているぷよを取得
 		Puyo puyo = getMyBoard().getCurrentPuyo();
+		// ぷよの方向を設定
 		puyo.setDirection(dir);
+		// 次のフィールドを取得
 		Field nextField = field.getNextField(puyo, x);
-
+		// 次のターンで負けている場合は0を返す
 		if(nextField == null){
 			return 0;
 		}
-
 		//危機的状況かどうか
 		boolean emergency = false;
 
@@ -118,15 +122,14 @@ public class Practice2 extends AbstractSamplePlayer {
 			*/
 		}
 		else{
-			//危機的状況のでなければ，つながりを多くする
-
+			//危機的状況でなければ，つながりを多くする
+			//できる限り各列の高さを同じになるように積んでいく
 			int max = 0;
 			int min = field.getHeight();
 			for(int i = 0; i < nextField.getWidth(); i++){
 				max = Math.max(max, nextField.getTop(i)+1);
 				min = Math.min(min, nextField.getTop(i)+1);
 			}
-
 			score += (field.getHeight()-(max-min));
 
 			//3連鎖以上する場合は積極的に置く
@@ -134,10 +137,17 @@ public class Practice2 extends AbstractSamplePlayer {
 				score += (getPuyoNum(field)-getPuyoNum(nextField));
 				score *= 2;
 			}
+			
+			//相手のboardのおじゃまぷよを最大にする
+			int enemyojamapuyo = getEnemyBoard().getTotalNumberOfOjama();
+			
+			
+			//もし1連鎖しかしない場合はあまり発火させない
+			if(getPuyoNum(nextField) == getPuyoNum(field)-2){
+				score /=4;
+			}
 
-			/**
-			 * 一番右にはあまり置かない
-			 */
+			// 一番右にはあまり置かない
 			if(x == field.getWidth()/2){
 				score /= 2;
 			}
@@ -147,38 +157,6 @@ public class Practice2 extends AbstractSamplePlayer {
 		printField(nextField);
 		System.out.printf("[%d-%s]\t%d\t%d\n", x, dir.toString(), score, getPuyoNum(nextField));
 		return score;
-	}
-
-	/**
-	 * 配置可能か，あるいは死んでしなわないかをチェックする
-	 * @param i
-	 * @param dir
-	 * @return 配置不能または死んでしまう場合はfalse
-	 */
-	private boolean isEnable(PuyoDirection dir, int i) {
-		Field field = getMyBoard().getField();
-
-		//配置不能ならfalse
-		if(!field.isEnable(dir, i)){
-			return false;
-		}
-
-		if(dir == PuyoDirection.DOWN || dir == PuyoDirection.UP){
-			if(field.getTop(i) >= field.getDeadLine()-2){
-				return false;
-			}
-		}
-		else if(dir == PuyoDirection.RIGHT){
-			if(field.getTop(i) >= field.getDeadLine()-2 || field.getTop(i+1) >= field.getDeadLine()-2) {
-				return false;
-			}
-		}
-		else if(dir == PuyoDirection.LEFT){
-			if(field.getTop(i) >= field.getDeadLine()-2 || field.getTop(i-1) >= field.getDeadLine()-2) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	/**
