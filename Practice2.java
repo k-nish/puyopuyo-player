@@ -53,17 +53,15 @@ public class Practice2 extends AbstractSamplePlayer {
 				// 盤面のスコアをscoreに代入
 				int score = getScore(field, i, dir, puyo);
 				if(score > maxScore && !nextfield.isDead()){
-					System.out.println("itiscore");
+					System.out.println("1score");
 					action = new Action(dir, i);
 					maxScore = score;
 				}
-				if (ojamalist.get(0) > 0) {
+				if (ojamalist.get(0) > 0 && ojamalist.get(1) == 0 && ojamalist.get(2) == 0) {
 					action = Bombone();
 				}else{
 					for (int j = 0; j < field.getWidth() ; j++ ) {
 						for (PuyoDirection dir2:PuyoDirection.values()) {
-							//nextfieldを取得
-							//Field nextield = field.getNextField(nextpuyo, j);
 							//配置不能、もしくは負けてしまうところには置かない
 							if (!isEnable(dir2, j)) {
 								continue;
@@ -73,18 +71,38 @@ public class Practice2 extends AbstractSamplePlayer {
 							//next2fieldを取得
 							Field next2field = nextfield.getNextField(nextpuyo, j);
 							if(score > maxScore && !next2field.isDead()){
-								System.out.println("niteyomiscore");
+								System.out.println("2score");
 								action = new Action(dir, i);
 								maxScore = score;
 							}
 							//お邪魔りすとをみて修正
+							if(){
+								action = Bombone();
+							}else{
+								for (int k = 0; k < field.getWidth() ; k++ ) {
+									for (PuyoDirection dir3:PuyoDirection.values()) {
+										//配置不能、もしくは負けてしまうところには置かない
+										if (!isEnable(dir2, j)) {
+											continue;
+										}
+										//盤面のスコアをscoreに代入
+										score = getScore(next2field, k, dir3, next2puyo);
+										//next3fieldを表示
+										Field next3field = next2field.getNextField(next2puyo, k);
+										if(score > maxScore && !next3field.isDead()){
+											System.out.println("3score");
+											action = new Action(dir, i);
+											maxScore = score;
+										}
+									}
+								}
+							}
 						}
 					}
 					continue;
 				}
 			}
 		}
-//		if(action == null || )
 		if(action == null){
 			System.out.println("Default");
 			action = getDefaultAction();
@@ -225,7 +243,7 @@ public class Practice2 extends AbstractSamplePlayer {
 		return num;
 	}
 	
-	//ぷよを最大限消すaction
+	//currentpuyoをみてぷよを最大限消すaction
 		Action Bombone(){
 			//現在のboardを取得
 			Board board = getGameInfo().getBoard(getMyPlayerInfo());
