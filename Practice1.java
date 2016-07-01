@@ -56,6 +56,8 @@ public class Practice1 extends AbstractSamplePlayer {
 		int puyonum = getPuyoNum(field);
 		//降ってくるおじゃまぷよの数
 		int ojamanum = getMyBoard().getTotalNumberOfOjama();
+		//降ってくるお邪魔のリスト
+		List<Integer> ojamalist = getMyBoard().getNumbersOfOjamaList();
 		//もっとも高い高さ
 		int maxi = 0;
 		int maxhigh = field.getTop(maxi);
@@ -94,6 +96,7 @@ public class Practice1 extends AbstractSamplePlayer {
 			System.out.println("Default Action!");
 			action = getDefaultAction();
 		}
+		System.out.println(ojamalist);
 		return action;
 	}
 
