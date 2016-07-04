@@ -35,7 +35,7 @@ public class Practice2 extends AbstractSamplePlayer {
 		//現在のターンで降ってくるおじゃまぷよの数を取得
 		int nowojama = getMyBoard().getCurrentTurnNumberOfOjama();
 		//溜まっているおじゃまぷよの数を取得
-		int strageojama = getMyBoard().getTotalNumberOfOjama();
+		int storageojama = getMyBoard().getTotalNumberOfOjama();
 		//おじゃまリストを取得
 		List<Integer> ojamalist = getMyBoard().getNumbersOfOjamaList();
 		//currentpuyoを取得
