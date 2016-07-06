@@ -40,7 +40,6 @@ public class Practice3 extends AbstractSamplePlayer {
 		int puyonum = getPuyoNum(field);
 		// 降ってくるおじゃまぷよのリスト
 		List<Integer> ojamalist = getMyBoard().getNumbersOfOjamaList();
-
 		// scoreの最大値をmaxScoreにする
 		int maxScore = getScore(field, 3, PuyoDirection.UP, puyo);
 		for(int i = 0; i < field.getWidth(); i++){
@@ -61,43 +60,47 @@ public class Practice3 extends AbstractSamplePlayer {
 						action = new Action(dir, i);
 						maxScore = score;
 					}
-					for (int j = 0; j < field.getWidth() ; j++ ) {
-						for (PuyoDirection dir2:PuyoDirection.values()) {
-							//puyoの方向を指定
-							nextpuyo.setDirection(dir2);
-							//nextfieldが存在するときのみを考える
-							if (nextfield != null) {
-								//配置不能、もしくは負けてしまうところには置かない
-								if (!isEnable(nextfield, dir2, j)) {
-									continue;
-								}
-								//盤面のスコアをscoreに代入
-								score = getScore(nextfield, j, dir2, nextpuyo);
-								//next2fieldを取得
-								Field next2field = nextfield.getNextField(nextpuyo, j);
-								if (next2field != null) {
-									if(score > maxScore && !next2field.isDead()){
-										System.out.println("2score");
-										action = new Action(dir, i);
-										maxScore = score;
+					if (ojamalist.get(0) == 0) {
+						for (int j = 0; j < field.getWidth() ; j++ ) {
+							for (PuyoDirection dir2:PuyoDirection.values()) {
+								//puyoの方向を指定
+								nextpuyo.setDirection(dir2);
+								//nextfieldが存在するときのみを考える
+								if (nextfield != null) {
+									//配置不能、もしくは負けてしまうところには置かない
+									if (!isEnable(nextfield, dir2, j)) {
+										continue;
 									}
-									for (int k = 0; k < field.getWidth() ; k++ ) {
-										for (PuyoDirection dir3:PuyoDirection.values()) {
-											//puyoの方向を指定
-											next2puyo.setDirection(dir3);
-											//配置不能、もしくは負けてしまうところには置かない
-											if (!isEnable(next2field, dir2, j)) {
-												continue;
-											}
-											//盤面のスコアをscoreに代入
-											score = getScore(next2field, k, dir3, next2puyo);
-											//next3fieldを表示
-											Field next3field = next2field.getNextField(next2puyo, k);
-											if (next3field != null) {
-												if(score > maxScore && !next3field.isDead()){
-													System.out.println("3score");
-													action = new Action(dir, i);
-													maxScore = score;
+									//盤面のスコアをscoreに代入
+									score = getScore(nextfield, j, dir2, nextpuyo);
+									//next2fieldを取得
+									Field next2field = nextfield.getNextField(nextpuyo, j);
+									if (next2field != null) {
+										if(score > maxScore && !next2field.isDead()){
+											System.out.println("2score");
+											action = new Action(dir, i);
+											maxScore = score;
+										}
+										if (ojamalist.get(1) == 0) {
+											for (int k = 0; k < field.getWidth() ; k++ ) {
+												for (PuyoDirection dir3:PuyoDirection.values()) {
+													//puyoの方向を指定
+													next2puyo.setDirection(dir3);
+													//配置不能、もしくは負けてしまうところには置かない
+													if (!isEnable(next2field, dir2, j)) {
+														continue;
+													}
+													//盤面のスコアをscoreに代入
+													score = getScore(next2field, k, dir3, next2puyo);
+													//next3fieldを表示
+													Field next3field = next2field.getNextField(next2puyo, k);
+													if (next3field != null) {
+														if(score > maxScore && !next3field.isDead()){
+															System.out.println("3score");
+															action = new Action(dir, i);
+															maxScore = score;
+														}
+													}
 												}
 											}
 										}
@@ -147,6 +150,10 @@ public class Practice3 extends AbstractSamplePlayer {
 		if(getMyBoard().getTotalNumberOfOjama() > 0 || totalPuyoNum > field.getWidth()*field.getHeight()/2 || field.getTop(x) > 10){
 			emergency = true;
 		}
+		消せる相手の最大数が自分の消せる
+		if () {
+			
+		}
 		// スコア
 		int score = 0;
 		//つながりが強いほど高スコア
@@ -161,8 +168,8 @@ public class Practice3 extends AbstractSamplePlayer {
 
 		if(emergency){
 			//危機的状況の時は積極的に消しに行く
-			score *= (field.getHeight() * field.getWidth() - getPuyoNum(nextField)) * 10;
-			score += (getPuyoNum(field) - getPuyoNum(nextField))*10;
+			score *= (field.getHeight() * field.getWidth() - getPuyoNum(nextField)) * 1000;
+			score += (getPuyoNum(field) - getPuyoNum(nextField))*1000;
 		}
 		else{
 			//3連鎖以下のときはあまり発火させない
@@ -424,18 +431,6 @@ public class Practice3 extends AbstractSamplePlayer {
 		}
 		return true;
 	}
-
-	// private int ojamanum(Field field){
-	// 	if(field != null){
-	// 		//おじゃまの数を数える
-	// 		int ojamanum = 0;
-	// 		for (int i = 0; i < 5; i++ ) {
-	// 			for(PuyoDirection dir:PuyoDirection.values()){
-
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 
 	public void printField(Field field){
