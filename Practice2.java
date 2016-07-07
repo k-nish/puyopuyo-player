@@ -224,6 +224,11 @@ public class Practice2 extends AbstractSamplePlayer {
 			// score += field.getHeight()*field.getWidth()-getPuyoNum(nextField);
 			score += (field.getHeight() * field.getWidth() - getPuyoNum(nextField)) * 2;
 			score += (getPuyoNum(field) - getPuyoNum(nextField))*2;
+			// for(int i = 0; i < countField.length; i++){
+			// 	for(int j = 0; j < countField[i].length; j++){
+			// 		score += countField[i][j]*1000;
+			// 	}
+			// }
 		}
 		else{
 			// //危機的状況でなければ，つながりを多くする
