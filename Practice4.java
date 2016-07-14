@@ -15,6 +15,7 @@ import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.Field;
 import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.Puyo;
 import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.Puyo.PuyoDirection;
 import jp.ac.nagoya_u.is.ss.kishii.usui.system.game.PuyoPuyo;
+import jp.ac.nagoya_u.is.ss.kishii.usui.system.storage.PuyoType;
 
 
 
@@ -180,7 +181,6 @@ public class Practice4 extends AbstractSamplePlayer {
 
 		if(emergency){
 			//危機的状況の時は積極的に消しに行く
-			// score += field.getHeight()*field.getWidth()-getPuyoNum(nextField);
 			score += (field.getHeight() * field.getWidth() - getPuyoNum(nextField)) * 2;
 			score += (getPuyoNum(field) - getPuyoNum(nextField))*2;
 			for(int i = 0; i < countField.length; i++){
@@ -190,7 +190,6 @@ public class Practice4 extends AbstractSamplePlayer {
 		}
 		}
 		else{
-			// //危機的状況でなければ，つながりを多くする
 			//3連鎖以下のときはあまり発火させない
 			if(getPuyoNum(field) - getPuyoNum(nextField) >= 0 && getPuyoNum(field) - getPuyoNum(nextField) < 12){
 				score -= (getPuyoNum(field)-getPuyoNum(nextField))*2;
