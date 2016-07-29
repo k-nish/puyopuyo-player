@@ -1,7 +1,5 @@
 package player;
 
-
-
 import sp.AbstractSamplePlayer;
 
 import sp.ConnectionCounter;
