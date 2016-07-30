@@ -46,12 +46,6 @@ public class puyonish extends AbstractSamplePlayer {
 		int puyonum = getPuyoNum(field);
 		//相手のフィールドのぷよの総数
 		int enemypuyonum = getPuyoNum(getEnemyBoard().getField());
-
-		// System.out.println(nowojama);
-		// System.out.println(storageojama);
-		// System.out.println(puyonum);
-		// System.out.println(enemypuyonum);
-		// System.out.println(ojamalist);
 		// scoreの最大値をmaxScoreにする
 		int maxScore = getScore(field, 3, PuyoDirection.UP, puyo);
 		for(int i = 0; i < field.getWidth(); i++){
@@ -72,6 +66,7 @@ public class puyonish extends AbstractSamplePlayer {
 						action = new Action(dir, i);
 						maxScore = score;
 					}
+					// 次のターンでお邪魔ぷよが降ってこないときのみ2手先以降を見る
 					if(ojamalist.get(0) <= 5){
 						for (int j = 0; j < field.getWidth() ; j++ ) {
 							for (PuyoDirection dir2:PuyoDirection.values()) {
@@ -93,6 +88,7 @@ public class puyonish extends AbstractSamplePlayer {
 											action = new Action(dir, i);
 											maxScore = score;
 										}
+										// 次の次のターンでお邪魔ぷよが降ってこないときのみ3手先を考える
 										if(ojamalist.get(1) <= 5){
 											for (int k = 0; k < field.getWidth() ; k++ ) {
 												for (PuyoDirection dir3:PuyoDirection.values()) {
@@ -136,13 +132,7 @@ public class puyonish extends AbstractSamplePlayer {
 		return action;
 	}
 
-	/**
-	 * スコアリング
-	 * @param x
-	 * @param dir
-	 * @return
-	 */
-	//引数を変更したのでその分のコード修正
+	//盤面の評価スコアを計算し、int型のスコアを返す
 	private int getScore(Field field, int x, PuyoDirection dir, Puyo puyo) {
 		// ぷよの方向を設定
 		puyo.setDirection(dir);
@@ -154,7 +144,7 @@ public class puyonish extends AbstractSamplePlayer {
 		}
 		//危機的状況かどうか
 		boolean emergency = false;
-
+		// 盤面上のぷよの総数を計算する
 		int totalPuyoNum = 0;
 		for(int i = 0; i < field.getWidth(); i++){
 			totalPuyoNum += field.getTop(i) + 1;
@@ -162,29 +152,20 @@ public class puyonish extends AbstractSamplePlayer {
 		if(getMyBoard().getTotalNumberOfOjama() > 0 || totalPuyoNum > field.getWidth()*field.getHeight()/2 || field.getTop(x) > 10){
 			emergency = true;
 		}
-
+		// 盤面の評価スコアをscoreとし、初期値を0にする
 		int score = 0;
-
-		//つながりが強いほど高スコア
+		//つながりが強いほど高スコアとなるようにscoreにつながりの数を加える
 		ConnectionCounter cnt = new ConnectionCounter(nextField);
 		int[][] countField = cnt.getConnectedPuyoNum();
-
 		for(int i = 0; i < countField.length; i++){
 			for(int j = 0; j < countField[i].length; j++){
 				score += countField[i][j];
 			}
 		}
-
 		if(emergency){
 			//危機的状況の時は積極的に消しに行く
-			//できる限りつながりを作るようにする
 			score += (field.getHeight() * field.getWidth() - getPuyoNum(nextField)) * 2;
 			score += (getPuyoNum(field) - getPuyoNum(nextField))*2;
-//			for(int i = 0; i < countField.length; i++){
-//				for(int j = 0; j < countField[i].length; j++){
-//					score += countField[i][j] * 10;
-//				}
-//			}
 		}
 		else{
 			//危機的状況でなければ，つながりを多くする
@@ -206,15 +187,13 @@ public class puyonish extends AbstractSamplePlayer {
 
 			//できる限り真ん中におく
 			score /= (double)(Math.abs((field.getWidth()+1)/2 - x) + 1);
-
 			if(x == 0 || x == 5){
 				score -= 1000;
 			}
-
 			if(x == 1 || x == 4){
 				score -= 500;
 			}
-
+			// 高く積みすぎないように高さが10を超えるときは評価スコアを小さくする
 			if(nextField.getTop(x) > 10){
 				score -= 1000000000;
 			}
@@ -222,21 +201,12 @@ public class puyonish extends AbstractSamplePlayer {
 		return score;
 	}
 
-	/**
-	 * 指定したフィールドのぷよ数を返す
-	 * @param field
-	 * @return
-	 */
+	// 指定したフィールドのぷよの総数を返す
 	int getPuyoNum(Field field){
 		int num = 0;
-		//ここでぷよの数を数える．
-		//field.getTop(columnNum)で，ぷよが存在する場所を返すので，
-		//それより1大きい数のぷよがその列には存在する
-		//ぷよが一つもない列は-1が返ってくることに注意．
 		for(int i = 0; i < field.getWidth(); i++){
 			num += field.getTop(i)+1;
 		}
-
 		return num;
 	}
 
